@@ -40,13 +40,21 @@ class Microcin_Expression:
         :param params_spec:
         :param inducer:
         :param repressor:
-        :param constitutive:
         """
         self.name = microcin_name
         self.params_dict = gen_param_dict(self.name, params_spec)
         self.inducer = inducer
         self.repressor = repressor
-        
+
+class Chassis:
+    def __init__(self, chassis_name, substrate, chassis_params_spec):
+        self.name = chassis_name
+        self.params_dict = gen_param_dict(chassis_params_spec)
+        self.substrate = substrate
+
+class Media:
+    def __init__(self):
+
 
 class Bioreactor:
     def __init__(self):
@@ -80,14 +88,8 @@ class Bioreactor:
             """
 
             self.name = strain_name
-
-
-
-
-
             self.substrate_consumption = substrate_consumption
             self.microcin_sensitivities = microcin_sensitivity
-
             self.AHL_expression = AHL_expression
             self.microcin_expression = microcin_expression
 
@@ -97,6 +99,8 @@ class Bioreactor:
 if __name__ == "__main__":
     AHL_params_spec = "/species_param_specs/AHL_params.xml"
     microcin_params_spec = "/species_param_specs/microcin_params.xml"
+    chassis_params_spec = "/species_param_specs/chassis_params.xml"
+    global_params_spec = "/species_param_specs/global_params.xml"
 
     # AHL_names = ["1", "2", "3"]
     # microcin_names = ["mccI", "mccV"]
@@ -104,6 +108,8 @@ if __name__ == "__main__":
 
     AHL_1 = AHL_Expression("AHL_1", AHL_params_spec)
     microcin_1 = Microcin_Expression("mccI", microcin_params_spec)
+    chassis_1 =
+
 
     N1_AHL = [AHL_1]
     N1_microcin_expr = [microcin_1]

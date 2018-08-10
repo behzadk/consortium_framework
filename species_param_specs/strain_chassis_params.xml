@@ -1,0 +1,6 @@
+<parameters>
+<K> constant 2 </K>
+<g> constant 1000000000000.0 </g>
+<mu_max> uniform 0.4 3 </mu_max>
+</parameters>
+

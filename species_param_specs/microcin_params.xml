@@ -1,4 +1,5 @@
 <parameters>
 <KB> constant 1e-07 </KB>
+<kBmax> constant 1e-22 </kBmax>
 <nB> constant 2 </nB>
 </parameters>
