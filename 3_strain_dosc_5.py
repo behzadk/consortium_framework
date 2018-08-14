@@ -38,8 +38,8 @@ def find_signal_peaks_and_troughs(y):
 
         elif current_state == "positive" and previous_state == "negative":
             trough_idx.append(idx)
-   
-                                      
+
+
 
     return(peak_idx, trough_idx)
 
@@ -114,6 +114,7 @@ def check_below_one(data):
 
     return False
 
+def get_threshold_amps_count(data):
 
 
 def distance(data1, data2, parameters, model):
@@ -127,7 +128,7 @@ def distance(data1, data2, parameters, model):
     target_amp = 1e12 * 0.1
     target_period_freq = 2400
     # get data for competitor
-    
+
     dataN_1 = data1[:, 0]
     dataN_2 = data1[:, 1]
     dataN_3 = data1[:, 2]
@@ -143,51 +144,50 @@ def distance(data1, data2, parameters, model):
 
     dataN_1 = dataN_1[500:]
 
-    dataN_1_peak_idx, dataN_C_trough_idx = find_signal_peaks_and_troughs(dataN_1)
-    dataN_1_amps = get_amplitudes(dataN_C_peak_idx, dataN_C_trough_idx, dataN_1)
-    average_amp = mean(dataN_C_amps)
+    distances = []
 
-    # if period_freq >= 2400:
-    #     return[None, None, None]
+    # Each strain has three distances
+    for d in data1:
+        d = d[500:]
+        d_peak_idx, d_trough_idx = find_signal_peaks_and_troughs(d)
+        d_amps = get_amplitudes(d_peak_idx, d_trough_idx, d)
+        d_average_amp = mean(d_amps)
 
-    if len(dataN_C_amps) == 0:
-        return[None, None, None]
+        if len(d_average_amp) == 0:
+            return [None, None, None]
 
-    dataN_C_threshold_amps_count = 0
-    period_freq = 1/getf(dataN_C)
+        d_threshold_amps_count = 0
+        period_freq = 1/getf(dataN_1)
 
-    # Count number of amplitudes above the target
-    for amp in dataN_C_amps:
-        if amp > target_amp:
-            dataN_C_threshold_amps_count = dataN_C_threshold_amps_count + 1
+        # Count number of amplitudes above the target
+        for amp in d_amps:
+            if amp > target_amp:
+                d_threshold_amps_count = d_threshold_amps_count + 1
 
-    dataN_C_final_amp = dataN_C_amps[-1]
+        d_final_amp = d_amps[-1]
 
-    target_num_peaks = target_period_freq / period_freq
+        target_num_peaks = target_period_freq / period_freq
 
-    d1 = abs(dataN_C_threshold_amps_count - target_num_peaks)
-    if d1 <= 0.9:
-        d1 = 0
 
-    else:
-        d1 = abs(dataN_C_threshold_amps_count - target_num_peaks)
+        dist_1 = abs(d_threshold_amps_count - target_num_peaks)
+        dist_2 = d_final_amp - target_amp
 
-    if dataN_C_final_amp > target_amp:
-        d2 = 0
+        if dist_1 <= 0.9:
+            dist_1 = 0
 
-    else:
-        d2 = abs(dataN_C_final_amp - target_amp)
+        if dist_2 > 0:
+            dist_2 = 0
 
-    # Is this a good idea? Motivation is that we will have one distance to 
-    # encourage standard deviation away from the middle value, while the other
-    # encourages low deviation in peak values. Will it balance out nicely?
+        else:
+            dist_2 = abs(dist_2)
 
-    if period_freq < target_period_freq:
-        d3 = 0
+        if (period_freq < target_period_freq):
+            dist_3 = 0
 
-    else:
-        d3 = abs(period_freq - target_period_freq)
+        else:
+            dist_3 = abs(period_freq - target_period_freq)
 
-    # d4 = log10(std(dataN_C_amps))
+        distances.extend([dist_1, dist_2, dist_3])
 
-    return [d1, d2, d3]
+
+    return distances

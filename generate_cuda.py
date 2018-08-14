@@ -8,10 +8,16 @@ def generate_model_params_file(bioreactor, model_eqs, model_name, output_dir):
     output_string = ""
 
     #  Generate input file
-    output_string = output_string + "<name> " + str(model_name) + " </name>\n"
+    output_string = output_string + "<name> " + "model_cuda_" + str(model_name) + " </name>\n"
     output_string = output_string + "<source> </source>\n"
     output_string = output_string + "<type> ODE </type>\n"
-    output_string = output_string + "<fit> species1 species2 species3 species4 species5 species6 species7 </fit>\n"
+    output_string = output_string + "<fit>"
+
+    for idx, s in enumerate(species):
+        if "N_" in s:
+            output_string = output_string + "species" + str(idx+1) + " "
+    output_string = output_string + "</fit>\n"
+
     output_string = output_string + "<logp> False </logp>\n"
     output_string = output_string + "<initial>\n"
 
@@ -49,13 +55,14 @@ def generate_model_params_file(bioreactor, model_eqs, model_name, output_dir):
     output_string = output_string + "</parameters>\n"
 
     f.write(output_string)
+    return(output_string)
 
 def generate_model_cuda(bioreactor, model_eqs, model_name, output_dir):
     model_eqs_dict = OrderedDict(sorted(model_eqs.items()))
     all_params = bioreactor.get_all_parameters()
     param_list = sorted(all_params)
 
-    f = open(output_dir + "model_cuda" + str(model_name) + ".cu", 'w')
+    f = open(output_dir + "model_cuda_" + str(model_name) + ".cu", 'w')
     cuda_output = ''
 
     # Write includes
@@ -126,8 +133,8 @@ def generate_input_file(model_list, input_file_output):
     output_string = output_string + "<modelnumber> " + str(len(model_list)) + " </modelnumber>\n"
     output_string = output_string + "<restart> False </restart>\n"
     output_string = output_string + "<autoepsilon>\n"
-    output_string = output_string + "<finalepsilon> 0.1 0.1 </finalepsilon>\n"
-    output_string = output_string + "<alpha> 0.3 </alpha>\n"
+    output_string = output_string + "<finalepsilon> 0.1 0.1 0.00001 </finalepsilon>\n"
+    output_string = output_string + "<alpha> 0.7 </alpha>\n"
     output_string = output_string + "</autoepsilon>\n"
     output_string = output_string + "<particles> 100 </particles>\n"
     output_string = output_string + "<beta> 1 </beta>\n"

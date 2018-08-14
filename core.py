@@ -252,6 +252,13 @@ if __name__ == "__main__":
     b.update_species_list()
     # b.list_species()
     # b.strains[0].list_parameters()
-    model_eqs = build_equations.build_bioreactor_equations(b)
-    generate_cuda.generate_model_params_file(b, model_eqs, 1, "./new_models/")
-    generate_cuda.generate_model_cuda(b, model_eqs, 1, "./new_models/")
+    model_1_eqs = build_equations.build_bioreactor_equations(b)
+    model_2_eqs = build_equations.build_bioreactor_equations(b)
+
+    model_1_params = generate_cuda.generate_model_params_file(b, model_1_eqs, 1, "./new_models/")
+    model_2_params = generate_cuda.generate_model_params_file(b, model_2_eqs, 2, "./new_models/")
+
+    generate_cuda.generate_model_cuda(b, model_1_eqs, 1, "./new_models/")
+    generate_cuda.generate_model_cuda(b, model_2_eqs, 2, "./new_models/")
+
+    generate_cuda.generate_input_file([model_1_params, model_2_params], "./new_models/input_multi_model.xml")
