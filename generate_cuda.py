@@ -98,6 +98,7 @@ def generate_model_cuda(bioreactor, model_eqs, model_name, output_dir):
     # Write equations
     equation_string = "ydot[#INDEX#] = #EQ#;\n"
     for idx, eq_key in enumerate(model_eqs_dict):
+        print(eq_key)
         write_eq = equation_string.replace("#INDEX#", str(idx))
         write_eq = write_eq.replace("#EQ#", model_eqs_dict[eq_key])
         for idx, eq_key in enumerate(model_eqs_dict):
