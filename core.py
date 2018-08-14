@@ -139,6 +139,10 @@ class Bioreactor:
 
             all_params.update(strain.chassis.params_dict)
 
+        for substrate in self.substrates:
+            all_params.update(substrate.params_dict)
+
+        print(len(all_params.keys()))
         return all_params
 
     class Strain:
@@ -207,16 +211,19 @@ if __name__ == "__main__":
 
 
     # Create objects which essentially represent parts.
+    AHL_1 = AHL_Expression("1", AHL_params_spec)
+
     chassis_1 = Chassis("CV514", "leu", chassis_params_spec)
     chassis_2 = Chassis("MG", "glu", chassis_params_spec)
+    chassis_3 = Chassis("XX", "glu", chassis_params_spec)
 
-    microcin_1 = Microcin_Expression("1", microcin_params_spec, "AHL1", None)
+    microcin_1 = Microcin_Expression("1", microcin_params_spec, "1", None)
 
     # Create arrays for initiating a strain N1
     N1_AHL = [AHL_1]
     N1_chassis = chassis_1
     N1_microcin_expr = [microcin_1]
-    N1_microcin_sens = ["mccI"]
+    N1_microcin_sens = ["1"]
     N1_substrate_consumption = ["leu"]
 
     N2_AHL = [AHL_1]
@@ -226,7 +233,7 @@ if __name__ == "__main__":
     N2_substrate_consumption = ["glu"]
 
     N3_AHL = []
-    N3_chassis = chassis_2
+    N3_chassis = chassis_3
     N3_microcin_expr = []
     N3_microcin_sens = []
     N3_substrate_consumption = ["glu"]
@@ -239,6 +246,7 @@ if __name__ == "__main__":
 
     b.add_new_strain("MG", N2_chassis, N2_AHL, N2_microcin_expr, N2_microcin_sens)
     b.add_new_strain("XX", N3_chassis, N3_AHL, N3_microcin_expr, N3_microcin_sens)
+
     b.add_new_substrate("glu", substrate_params_spec)
 
     b.update_species_list()
