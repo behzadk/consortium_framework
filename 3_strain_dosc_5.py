@@ -122,18 +122,9 @@ def distance(data1, data2, parameters, model):
     # data2 is real
     # model is the model number
 
-    target_freq = 0.02
-    target_num_peaks = 15    # Target is 9 because we are starting measurement from t = 100
-    target_peak_val_diff = 0
     target_amp = 1e12 * 0.1
     target_period_freq = 2400
     # get data for competitor
-
-    dataN_1 = data1[:, 0]
-    dataN_2 = data1[:, 1]
-    dataN_3 = data1[:, 2]
-
-    dataS = data1[:, 6]
 
     if check_isnan(data1) is True:
         return[None, None, None]
@@ -142,7 +133,6 @@ def distance(data1, data2, parameters, model):
         return[None, None, None]
 
 
-    dataN_1 = dataN_1[500:]
 
     distances = []
 
@@ -157,7 +147,7 @@ def distance(data1, data2, parameters, model):
             return [None, None, None]
 
         d_threshold_amps_count = 0
-        period_freq = 1/getf(dataN_1)
+        period_freq = 1/getf(d)
 
         # Count number of amplitudes above the target
         for amp in d_amps:
