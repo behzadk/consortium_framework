@@ -1,0 +1,29 @@
+<name> 1 </name>
+<source> </source>
+<type> ODE </type>
+<fit> species1 species2 species3 species4 species5 species6 species7 </fit>
+<logp> False </logp>
+<initial>
+<A_AHL_1> constant 1e-10 </A_AHL_1>
+<B_mccI> constant 0 </B_mccI>
+<N_CV514> constant 1000000000000.0 </N_CV514>
+<N_MG> constant 1000000000000.0 </N_MG>
+<N_XX> constant 1000000000000.0 </N_XX>
+<S_glu> constant 4 </S_glu>
+<S_leu> constant 4 </S_leu>
+</initial>
+
+<parameters>
+<D>  uniform 0.02 0.5  </D>
+<KB_mccI>  constant 1e-07  </KB_mccI>
+<K_CV514>  constant 2  </K_CV514>
+<K_MG>  constant 2  </K_MG>
+<g_CV514>  constant 1000000000000.0  </g_CV514>
+<g_MG>  constant 1000000000000.0  </g_MG>
+<kA_AHL_1>  constant 8e-21  </kA_AHL_1>
+<kBmax_mccI>  constant 1e-22  </kBmax_mccI>
+<mu_max_CV514>  uniform 0.4 3  </mu_max_CV514>
+<mu_max_MG>  uniform 0.4 3  </mu_max_MG>
+<nB_mccI>  constant 2  </nB_mccI>
+<omega_mccI>  constant 100000000.0  </omega_mccI>
+</parameters>

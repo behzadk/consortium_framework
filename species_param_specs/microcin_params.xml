@@ -2,4 +2,5 @@
 <KB> constant 1e-07 </KB>
 <kBmax> constant 1e-22 </kBmax>
 <nB> constant 2 </nB>
+<omega> constant 100000000.0 </omega>
 </parameters>
