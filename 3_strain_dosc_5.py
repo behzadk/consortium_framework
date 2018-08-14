@@ -4,6 +4,8 @@ from numpy.linalg import *
 step = 5
 
 # This function returns the frequency of the largest powered signal
+
+
 def getf(x):
     fourier = fft.rfft(x)
     mag = abs(fourier)**2
@@ -11,6 +13,7 @@ def getf(x):
     r = fft.fftfreq(len(x), d=step)
     f = r[maxa]
     return f
+
 
 def find_signal_peaks_and_troughs(y):
     """ y (signal) and identifies peaks and troughs with a defined minimum amplitude"""
@@ -35,11 +38,8 @@ def find_signal_peaks_and_troughs(y):
         if current_state == "negative" and previous_state == "positive":
             peak_idx.append(idx)
 
-
         elif current_state == "positive" and previous_state == "negative":
             trough_idx.append(idx)
-
-
 
     return(peak_idx, trough_idx)
 
@@ -66,9 +66,10 @@ def normalise_signal(signal_data):
     max_signal = max(signal_data)
     min_signal = min(signal_data)
 
-    norm_function = lambda x: (x - min_signal)/(max_signal - min_signal)
+    def norm_function(x): return (x - min_signal)/(max_signal - min_signal)
 
     return norm_function(signal_data)
+
 
 def count_intersects(signal_data):
     signal_median = median(signal_data)
@@ -92,6 +93,7 @@ def average_value_difference(y, peaks_idx):
 
     return(mean(diff(values)))
 
+
 def compare_final_amp_to_all(final_amp, all_amps):
 
     diff_amps = []
@@ -100,28 +102,27 @@ def compare_final_amp_to_all(final_amp, all_amps):
 
     return(abs(mean(diff_amps)))
 
+
 def check_isnan(data):
-    for idx, i in enumerate(data)
-        if isnan(data[:, idx]):
+    for idx, i in enumerate(data.T):
+        if isnan(data[:, idx][0]):
             return True
 
     return False
 
+
 def check_below_one(data):
-    for idx, i in enumerate(data):
+    for idx, i in enumerate(data.T):
         if min(data[:, idx]) < 1:
             return True
 
     return False
-
-def get_threshold_amps_count(data):
 
 
 def distance(data1, data2, parameters, model):
     # data1 is simulated, and has shape npoints x beta
     # data2 is real
     # model is the model number
-
     target_amp = 1e12 * 0.1
     target_period_freq = 2400
     # get data for competitor
@@ -132,18 +133,15 @@ def distance(data1, data2, parameters, model):
     if check_below_one(data1) is True:
         return[None, None, None]
 
-
-
     distances = []
 
     # Each strain has three distances
-    for d in data1:
+    for d in data1.T:
         d = d[500:]
         d_peak_idx, d_trough_idx = find_signal_peaks_and_troughs(d)
         d_amps = get_amplitudes(d_peak_idx, d_trough_idx, d)
-        d_average_amp = mean(d_amps)
 
-        if len(d_average_amp) == 0:
+        if len(d_amps) == 0:
             return [None, None, None]
 
         d_threshold_amps_count = 0
@@ -157,7 +155,6 @@ def distance(data1, data2, parameters, model):
         d_final_amp = d_amps[-1]
 
         target_num_peaks = target_period_freq / period_freq
-
 
         dist_1 = abs(d_threshold_amps_count - target_num_peaks)
         dist_2 = d_final_amp - target_amp
@@ -178,6 +175,5 @@ def distance(data1, data2, parameters, model):
             dist_3 = abs(period_freq - target_period_freq)
 
         distances.extend([dist_1, dist_2, dist_3])
-
 
     return distances
