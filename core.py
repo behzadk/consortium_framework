@@ -187,14 +187,181 @@ class Bioreactor:
             self.params_dict = gen_param_dict(substrate_name, substrate_params_spec)
 
 
-def part_generator():
-    AHL_1 = AHL_Expression("1", AHL_params_spec)
-    AHL_2 = AHL_Expression("2", AHL_params_spec)
-    AHL_3 = AHL_Expression("3", AHL_params_spec)
+def strain_generator(AHL_params_spec, microcin_params_spec):
+    # 3 Strains
+    # Each strain expresses maximum 1 AHL, maximum 1 microcin
+    # Sensitive always to one microcin or none
 
-    microcin_1 = Microcin_Expression("1", microcin_params_spec, "AHL1", None)
-    microcin_2 = Microcin_Expression("1", microcin_params_spec, "AHL1", None)
-    microcin_3 = Microcin_Expression("1", microcin_params_spec, "AHL1", None)
+    AHL_names = ["1", "2"]
+    microcin_names = ["mccX", "mccY"]
+    strain_names = ["i", "o", "p"]
+
+
+    # Generate AHL objects
+    AHL_objects = []
+    for name in AHL_names:
+        AHL_objects.append([AHL_Expression(name, AHL_params_spec)])
+
+    AHL_objects.append([])
+
+
+    microcin_objects = []
+    # Generate microcin objects driven by different AHLs
+    for A_idx, a_name in enumerate(AHL_names):
+        for M_idx, m_name in enumerate(microcin_names):
+            new_induced_microcin = Microcin_Expression(m_name, microcin_params_spec, a_name, None)
+            new_repressed_microcin = Microcin_Expression(m_name, microcin_params_spec, None, a_name)
+            microcin_objects.extend( ([new_induced_microcin], [new_repressed_microcin]) )
+
+    microcin_objects.append([])
+
+    microcin_sensitivity = []
+    for name in microcin_names:
+        microcin_sensitivity.append([name])
+
+    microcin_sensitivity.append([])
+
+    part_combinations = []
+    for a in AHL_objects:
+        for m in microcin_objects:
+            for s in microcin_sensitivity:
+                part_combinations.append([a, m, s])
+
+    print(len(part_combinations))
+    strain_combinations = []
+
+    for idx_1, n_1 in enumerate(part_combinations):
+        for idx_2, n_2 in enumerate(part_combinations):
+            if idx_2 == idx_1:
+                continue
+
+            chassis_1 = Chassis("i", "glu", chassis_params_spec)
+            chassis_2 = Chassis("o", "glu", chassis_params_spec)
+
+            n_1 = [chassis_1] + n_1
+            n_2 = [chassis_2] + n_2
+            new_strain_set = [n_1, n_2]
+            strain_combinations.append(1)
+            print(len(strain_combinations))
+
+    np.shape(strain_combinations)
+
+
+def know_two_species_gen(bioreactor_params_spec, substrate_params_spec, AHL_params_spec, microcin_params_spec, chassis_params_spec):
+    chassis_1 = Chassis("x", "glu", chassis_params_spec)
+    chassis_2 = Chassis("c", "glu", chassis_params_spec)
+
+    bioreactor_a = Bioreactor(bioreactor_params_spec)
+    bioreactor_b = Bioreactor(bioreactor_params_spec)
+    bioreactor_c = Bioreactor(bioreactor_params_spec)
+
+    bioreactor_a.add_new_substrate("glu", substrate_params_spec)
+    bioreactor_b.add_new_substrate("glu", substrate_params_spec)
+    bioreactor_c.add_new_substrate("glu", substrate_params_spec)
+
+
+    AHL_names = ["a", "b"]
+    microcin_names = ["y", "z"]
+    strain_names = ["x", "c"]
+
+    AHL_a = AHL_Expression(AHL_names[0], AHL_params_spec)
+    AHL_b = AHL_Expression(AHL_names[1], AHL_params_spec)
+
+    # Model A
+    x_microcin_exp = Microcin_Expression("y", microcin_params_spec, "a", None)
+    c_microcin_exp = Microcin_Expression("z", microcin_params_spec, "b", None)
+
+    x_sensitivity = ["y"]
+    c_sensitivity = ["z"]
+    bioreactor_a.add_new_strain("x", chassis_1, [AHL_a], [x_microcin_exp], x_sensitivity)
+    bioreactor_a.add_new_strain("c", chassis_2, [AHL_b], [c_microcin_exp], c_sensitivity)
+
+    # Model B
+    x_microcin_exp = Microcin_Expression("y", microcin_params_spec, None, "b")
+    c_microcin_exp = Microcin_Expression("z", microcin_params_spec, "a", None)
+
+    x_sensitivity = ["y"]
+    c_sensitivity = ["z"]
+
+    bioreactor_b.add_new_strain("x", chassis_1, [AHL_a], [x_microcin_exp], x_sensitivity)
+    bioreactor_b.add_new_strain("c", chassis_2, [AHL_b], [c_microcin_exp], c_sensitivity)
+
+
+    # Model_C
+    x_microcin_exp = Microcin_Expression("y", microcin_params_spec, None, "a")
+
+    x_sensitivity = []
+    c_sensitivity = ["y"]
+
+    bioreactor_c.add_new_strain("x", chassis_1, [AHL_a], [x_microcin_exp], x_sensitivity)
+    bioreactor_c.add_new_strain("c", chassis_2, [], [], c_sensitivity)
+
+    # Model d
+    bioreactor_d = Bioreactor(bioreactor_params_spec)
+    bioreactor_d.add_new_substrate("glu", substrate_params_spec)
+
+    x_microcin_exp = Microcin_Expression("y", microcin_params_spec, "a", None)
+
+    x_sensitivity = []
+    c_sensitivity = ["y"]
+
+    bioreactor_d.add_new_strain("x", chassis_1, [], [x_microcin_exp], x_sensitivity)
+    bioreactor_d.add_new_strain("c", chassis_2, [AHL_a], [], c_sensitivity)
+
+
+
+    bioreactor_a.update_species_list()
+    bioreactor_b.update_species_list()
+    bioreactor_c.update_species_list()
+    bioreactor_d.update_species_list()
+
+    model_1_eqs = build_equations.build_bioreactor_equations(bioreactor_a)
+    model_1_params = generate_cuda.generate_model_params_file(bioreactor_a, model_1_eqs, "model_1", "./new_models/")
+    generate_cuda.generate_model_cuda(bioreactor_a, model_1_eqs, "model_1", "./new_models/")
+
+    model_2_eqs = build_equations.build_bioreactor_equations(bioreactor_b)
+    model_2_params = generate_cuda.generate_model_params_file(bioreactor_b, model_2_eqs, "model_2", "./new_models/")
+    generate_cuda.generate_model_cuda(bioreactor_b, model_2_eqs, "model_2", "./new_models/")
+
+    model_3_eqs = build_equations.build_bioreactor_equations(bioreactor_c)
+    model_3_params = generate_cuda.generate_model_params_file(bioreactor_c, model_3_eqs, "model_3", "./new_models/")
+    generate_cuda.generate_model_cuda(bioreactor_c, model_3_eqs, "model_3", "./new_models/")
+
+    model_4_eqs = build_equations.build_bioreactor_equations(bioreactor_d)
+    model_4_params = generate_cuda.generate_model_params_file(bioreactor_d, model_4_eqs, "model_4", "./new_models/")
+    generate_cuda.generate_model_cuda(bioreactor_d, model_4_eqs, "model_4", "./new_models/")
+
+    generate_cuda.generate_input_file([model_1_params, model_2_params, model_3_params, model_4_params], "./new_models/input_multi_model.xml")
+    generate_cuda.generate_input_file([model_4_params], "./new_models/input_file_model_4.xml")
+
+def repressilator(bioreactor_params_spec, substrate_params_spec, AHL_params_spec, microcin_params_spec, chassis_params_spec):
+    # Initiate three chassis required
+    chassis_1 = Chassis("x", "glu", chassis_params_spec)
+    chassis_2 = Chassis("c", "glu", chassis_params_spec)
+    chassis_3 = Chassis("f", "glu", chassis_params_spec)
+
+
+    # Iniitiate bioreactor and envirnoment
+    bioreactor_a = Bioreactor(bioreactor_params_spec)
+    bioreactor_a.add_new_substrate('glu', substrate_params_spec)
+
+
+    # Three constitutively expressed microcins
+    microcin_x_exp = Microcin_Expression("x", microcin_params_spec, None, None)
+    microcin_c_exp = Microcin_Expression("c", microcin_params_spec, None, None)
+    microcin_f_exp = Microcin_Expression("f", microcin_params_spec, None, None)
+
+    x_sensitivity = ["x"]
+    c_sensitivity = ["c"]
+    f_sensitivity = ["f"]
+
+    bioreactor_a.add_new_strain("x", chassis_1, [], [microcin_x_exp], x_sensitivity)
+    bioreactor_a.add_new_strain("c", chassis_2, [], [microcin_c_exp], c_sensitivity)
+    bioreactor_a.add_new_strain("f", chassis_3, [], [microcin_f_exp], f_sensitivity)
+
+    population_rpr_eqs = build_equations.build_bioreactor_equations(bioreactor_a)
+    population_rpr_params = generate_cuda.generate_model_params_file(bioreactor_a, population_rpr_eqs, "ring_rpr_model_1", "./new_models/")
+    generate_cuda.generate_model_cuda(bioreactor_a, population_rpr_eqs, "ring_rpr_model_1", "./new_models/")
 
 if __name__ == "__main__":
     # Paths to parameter spec files
@@ -204,12 +371,10 @@ if __name__ == "__main__":
     bioreactor_params_spec = "./species_param_specs/bioreactor_params.xml"
     substrate_params_spec = "./species_param_specs/substrate_params.xml"
 
-    strain_names = ["A", "B", "C"]
-    AHL_names = ["1", "2", "3"]
-    microcin_names = ["1", "2", "3"]
+    # know_two_species_gen(bioreactor_params_spec, substrate_params_spec, AHL_params_spec, microcin_params_spec, chassis_params_spec)
+    repressilator(bioreactor_params_spec, substrate_params_spec, AHL_params_spec, microcin_params_spec, chassis_params_spec)
 
-
-
+    exit()
     # Create objects which essentially represent parts.
     AHL_1 = AHL_Expression("1", AHL_params_spec)
 

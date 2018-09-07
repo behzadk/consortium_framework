@@ -135,45 +135,87 @@ def distance(data1, data2, parameters, model):
 
     distances = []
 
-    # Each strain has three distances
-    for d in data1.T:
-        d = d[500:]
-        d_peak_idx, d_trough_idx = find_signal_peaks_and_troughs(d)
-        d_amps = get_amplitudes(d_peak_idx, d_trough_idx, d)
+    d = data1[:, 1]
+    d = d[500:]
+    d_peak_idx, d_trough_idx = find_signal_peaks_and_troughs(d)
+    d_amps = get_amplitudes(d_peak_idx, d_trough_idx, d)
 
-        if len(d_amps) == 0:
-            return [None, None, None]
+    if len(d_amps) == 0:
+        return [None, None, None]
 
-        d_threshold_amps_count = 0
-        period_freq = 1/getf(d)
+    d_threshold_amps_count = 0
+    period_freq = 1/getf(d)
 
-        # Count number of amplitudes above the target
-        for amp in d_amps:
-            if amp > target_amp:
-                d_threshold_amps_count = d_threshold_amps_count + 1
+    # Count number of amplitudes above the target
+    for amp in d_amps:
+        if amp > target_amp:
+            d_threshold_amps_count = d_threshold_amps_count + 1
 
-        d_final_amp = d_amps[-1]
+    d_final_amp = d_amps[-1]
 
-        target_num_peaks = target_period_freq / period_freq
+    target_num_peaks = target_period_freq / period_freq
 
-        dist_1 = abs(d_threshold_amps_count - target_num_peaks)
-        dist_2 = d_final_amp - target_amp
+    dist_1 = abs(d_threshold_amps_count - target_num_peaks)
+    dist_2 = d_final_amp - target_amp
 
-        if dist_1 <= 0.9:
-            dist_1 = 0
+    if dist_1 <= 0.9:
+        dist_1 = 0
 
-        if dist_2 > 0:
-            dist_2 = 0
+    if dist_2 > 0:
+        dist_2 = 0
 
-        else:
-            dist_2 = abs(dist_2)
+    else:
+        dist_2 = abs(dist_2)
 
-        if (period_freq < target_period_freq):
-            dist_3 = 0
+    if (period_freq < target_period_freq):
+        dist_3 = 0
 
-        else:
-            dist_3 = abs(period_freq - target_period_freq)
+    else:
+        dist_3 = abs(period_freq - target_period_freq)
 
-        distances.extend([dist_1, dist_2, dist_3])
+    distances = [dist_1, dist_2, dist_3]
 
     return distances
+    ##############################################
+    # # Each strain has three distances
+    # for d in data1.T:
+    #     d = d[500:]
+    #     d_peak_idx, d_trough_idx = find_signal_peaks_and_troughs(d)
+    #     d_amps = get_amplitudes(d_peak_idx, d_trough_idx, d)
+    #
+    #     if len(d_amps) == 0:
+    #         return [None, None, None]
+    #
+    #     d_threshold_amps_count = 0
+    #     period_freq = 1/getf(d)
+    #
+    #     # Count number of amplitudes above the target
+    #     for amp in d_amps:
+    #         if amp > target_amp:
+    #             d_threshold_amps_count = d_threshold_amps_count + 1
+    #
+    #     d_final_amp = d_amps[-1]
+    #
+    #     target_num_peaks = target_period_freq / period_freq
+    #
+    #     dist_1 = abs(d_threshold_amps_count - target_num_peaks)
+    #     dist_2 = d_final_amp - target_amp
+    #
+    #     if dist_1 <= 0.9:
+    #         dist_1 = 0
+    #
+    #     if dist_2 > 0:
+    #         dist_2 = 0
+    #
+    #     else:
+    #         dist_2 = abs(dist_2)
+    #
+    #     if (period_freq < target_period_freq):
+    #         dist_3 = 0
+    #
+    #     else:
+    #         dist_3 = abs(period_freq - target_period_freq)
+    #
+    #     distances.extend([dist_1, dist_2, dist_3])
+
+    # return distances

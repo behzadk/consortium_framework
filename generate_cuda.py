@@ -141,7 +141,7 @@ def generate_input_file(model_list, input_file_output):
     output_string = output_string + "<dt> -1 </dt>\n"
     output_string = output_string + "<kernel> uniform </kernel>\n\n"
 
-    times = range(0, 2500, 5)
+    times = range(0, 5005, 5)
     t_str = str(list(times)).replace(",", "").replace("[", "").replace("]", "")
     output_string = output_string + "<data>\n"
     output_string = output_string + "<times>\n"

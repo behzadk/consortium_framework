@@ -1,6 +1,6 @@
 def gen_strain_growth_eq(strain):
-    general_mu_strain = "( mu_max_#STRAIN_NAME# * S_#SUB_NAME# / K_#STRAIN_NAME# + S_#SUB_NAME# ) "
-    general_sensitivity_term = " + omega_#MICROCIN_NAME# * B_#MICROCIN_NAME# "
+    general_mu_strain = "( mu_max_#STRAIN_NAME# * S_#SUB_NAME# / ( K_#STRAIN_NAME# + S_#SUB_NAME# ) ) "
+    general_sensitivity_term = " - omega_#MICROCIN_NAME# * B_#MICROCIN_NAME# "
 
     strain_sensitivty = ""
 
@@ -18,7 +18,7 @@ def gen_substrate_eq(substrate_name, bioreactor):
     # Init string with dilution term. Sub in the name of the substrate
     dS = (" D * (S0_#SUB_NAME# - S_#SUB_NAME# ) ")
 
-    general_mu_strain = "( mu_max_#STRAIN_NAME# * S_#SUB_NAME# / K_#STRAIN_NAME# + S_#SUB_NAME# ) "
+    general_mu_strain = "( mu_max_#STRAIN_NAME# * S_#SUB_NAME# / ( K_#STRAIN_NAME# + S_#SUB_NAME# ) ) "
     general_S_yield = " * N_#STRAIN_NAME# / g_#STRAIN_NAME# )"
 
     # Iterate through bioreactor strains, adding the yield term for each consumer
@@ -63,7 +63,7 @@ def gen_microcin_eq(microcin_name, bioreactor):
     dB = ""
 
     for strain in bioreactor.strains:
-        strain_production = " + ( kBmax_#MICROCIN_NAME# ".replace("#MICROCIN_NAME#", microcin_name)
+        strain_production = " + kBmax_#MICROCIN_NAME# ".replace("#MICROCIN_NAME#", microcin_name)
         for microcin in strain.microcin_expression:
             if microcin.name == microcin_name:
                 # Check for induced or repressed. It is possible for microcin to be both induced and repressed simultaneously.
@@ -76,8 +76,9 @@ def gen_microcin_eq(microcin_name, bioreactor):
                 if repressor is not None:
                     strain_production = strain_production + gen_repressed_microcin.replace("#AHL_NAME#", repressor)
 
-        dB = dB + strain_production + " ) * N_#STRAIN_NAME# "
-        dB = dB.replace("#STRAIN_NAME#", strain.name)
+
+            dB = dB + strain_production + " * N_#STRAIN_NAME# "
+            dB = dB.replace("#STRAIN_NAME#", strain.name)
 
     dB = dB + " - D * B_" + microcin_name + " "
     return dB
